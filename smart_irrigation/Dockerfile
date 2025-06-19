@@ -24,6 +24,7 @@ RUN pip3 install --no-cache-dir \
 COPY run.sh /
 COPY app/main.py /app/main.py
 COPY templates/ /app/templates/
+RUN ls -l / | tee /ls_root.txt
 
 # Create necessary directories and set permissions
 RUN mkdir -p /data /app/logs && \
