@@ -1,5 +1,6 @@
 repository: "https://github.com/ttaylor0024/HA_Z2M_Smart_Irrigation"
 name: "Z2M Smart Irrigation"
+slug: "z2m_smart_irrigation"
 maintainers:
   - "ttaylor0024"
 categories:
