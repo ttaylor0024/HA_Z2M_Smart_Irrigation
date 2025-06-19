@@ -58,8 +58,8 @@ options:
 schema:
   weather_api_key: str
   weather_provider: list(openweathermap|weatherapi|visualcrossing)
-  latitude: float(-90,90)
-  longitude: float(-180,180)
+  latitude: float
+  longitude: float
   units: list(metric|imperial)
   zones:
     - name: str
@@ -72,25 +72,25 @@ schema:
         - list(mon|tue|wed|thu|fri|sat|sun)
       flow_sensor: str?
       moisture_sensor: str?
-      moisture_threshold: int(0,100)
+      moisture_threshold: int
   rain_forecast:
     enabled: bool
-    threshold_mm: float(0,100)
-    hours_ahead: int(1,168)
-    skip_percentage: int(0,100)
+    threshold_mm: float
+    hours_ahead: int
+    skip_percentage: int
   recent_rain:
     enabled: bool
-    threshold_mm: float(0,100)
-    hours_back: int(1,168)
+    threshold_mm: float
+    hours_back: int
     compensation_enabled: bool
-    compensation_ratio: float(0,1)
+    compensation_ratio: float
   soil_moisture:
     enabled: bool
-    default_threshold: int(0,100)
+    default_threshold: int
   advanced:
-    between_zone_delay: int(0,300)
-    test_mode_duration: int(1,5)
-    flow_rate_assumption: float(1,100)
+    between_zone_delay: int
+    test_mode_duration: int
+    flow_rate_assumption: float
     enable_statistics: bool
 ports:
   8080/tcp: null
