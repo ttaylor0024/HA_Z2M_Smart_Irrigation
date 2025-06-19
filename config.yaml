@@ -1,0 +1,75 @@
+# config.yaml - Add-on Configuration
+name: Smart Irrigation Controller
+version: "1.0.0"
+slug: smart_irrigation
+description: Automated irrigation system with weather integration and Z2M valve control
+url: https://github.com/your-repo/smart-irrigation
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+init: false
+options:
+  weather_api_key: ""
+  weather_provider: "openweathermap"
+  latitude: 0.0
+  longitude: 0.0
+  zones:
+    - name: "Front Yard"
+      entity_id: "switch.front_yard_valve"
+      duration: 15
+      schedule: "06:00"
+      days: ["mon", "wed", "fri"]
+    - name: "Back Yard"
+      entity_id: "switch.back_yard_valve"
+      duration: 20
+      schedule: "06:15"
+      days: ["tue", "thu", "sat"]
+  rain_forecast:
+    enabled: true
+    threshold_mm: 5.0
+    hours_ahead: 24
+    skip_percentage: 80
+  recent_rain:
+    enabled: true
+    threshold_mm: 2.0
+    hours_back: 24
+    compensation_enabled: true
+    compensation_ratio: 0.5
+  soil_moisture:
+    enabled: false
+    sensor_entity: ""
+    threshold: 30
+schema:
+  weather_api_key: str
+  weather_provider: list(openweathermap|weatherapi)
+  latitude: float
+  longitude: float
+  zones:
+    - name: str
+      entity_id: str
+      duration: int(1,120)
+      schedule: str
+      days: [str]
+  rain_forecast:
+    enabled: bool
+    threshold_mm: float(0,100)
+    hours_ahead: int(1,168)
+    skip_percentage: int(0,100)
+  recent_rain:
+    enabled: bool
+    threshold_mm: float(0,100)
+    hours_back: int(1,168)
+    compensation_enabled: bool
+    compensation_ratio: float(0,1)
+  soil_moisture:
+    enabled: bool
+    sensor_entity: str?
+    threshold: int(0,100)
+ports:
+  8080/tcp: 8080
+startup: services
+webui: http://[HOST]:[PORT:8080]
+ingress: true
