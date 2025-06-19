@@ -11,180 +11,413 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --primary-color: #00a8ff;
+            --secondary-color: #00c853;
+            --danger-color: #ff5252;
+            --warning-color: #ff9800;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: #2a3f5f;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
             min-height: 100vh;
-            color: #333;
+            line-height: 1.6;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
         
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
+            background: var(--card-bg);
+            border-radius: 12px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
         
         .header h1 {
-            color: #2c3e50;
             font-size: 2.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
         
-        .status-grid {
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+        
+        .stats-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
         
-        .zone-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .zone-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
         }
         
-        .zone-header {
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        .weather-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        .weather-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
         
+        .weather-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .weather-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .zones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .zone-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .zone-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
+        }
+        
+        .zone-card.running {
+            border-color: var(--secondary-color);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 200, 83, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
+        }
+        
+        .zone-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
         .zone-name {
-            font-size: 1.4em;
+            font-size: 1.3em;
             font-weight: bold;
-            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .zone-type-icon {
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .status-badge {
-            padding: 6px 12px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-size: 0.9em;
             font-weight: bold;
             text-transform: uppercase;
         }
         
-        .status-idle { background: #e8f5e8; color: #27ae60; }
-        .status-running { background: #fff3cd; color: #856404; }
-        .status-completed { background: #d4edda; color: #155724; }
-        .status-failed { background: #f8d7da; color: #721c24; }
+        .status-idle { background: rgba(128, 128, 128, 0.3); color: #9e9e9e; }
+        .status-running { background: rgba(0, 200, 83, 0.3); color: #00c853; }
+        .status-completed { background: rgba(76, 175, 80, 0.3); color: #4caf50; }
+        .status-failed { background: rgba(255, 82, 82, 0.3); color: #ff5252; }
+        .status-disabled { background: rgba(255, 152, 0, 0.3); color: #ff9800; }
+        
+        .zone-body {
+            padding: 20px;
+        }
         
         .zone-details {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
         
         .detail-item {
-            background: rgba(240, 240, 240, 0.7);
-            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
             border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
         
         .detail-label {
-            font-size: 0.9em;
-            color: #666;
+            font-size: 0.85em;
+            color: var(--text-secondary);
             margin-bottom: 5px;
         }
         
         .detail-value {
             font-weight: bold;
-            color: #2c3e50;
+            color: var(--text-primary);
+            font-size: 1.1em;
+        }
+        
+        .sensor-readings {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .sensor-item {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .sensor-icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .sensor-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
         }
         
         .controls {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 10px;
-            margin-top: 20px;
         }
         
         .btn {
-            padding: 10px 20px;
+            padding: 12px 20px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
-            flex: 1;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
         }
         
         .btn-primary {
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: var(--primary-color);
             color: white;
         }
         
         .btn-primary:hover {
-            background: linear-gradient(45deg, #2980b9, #1f5f8b);
-            transform: translateY(-2px);
+            background: #0095e5;
         }
         
         .btn-secondary {
-            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            background: #424242;
             color: white;
         }
         
         .btn-secondary:hover {
-            background: linear-gradient(45deg, #7f8c8d, #6c7b7d);
-            transform: translateY(-2px);
+            background: #535353;
         }
         
-        .weather-info {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
         }
         
-        .weather-header {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            text-align: center;
+        .btn-danger:hover {
+            background: #ff3333;
         }
         
-        .refresh-btn {
+        .btn-success {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #00a843;
+        }
+        
+        .btn[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn[disabled]:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #424242;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--secondary-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .quick-actions {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5em;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
             z-index: 1000;
         }
         
-        .refresh-btn:hover {
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fab:hover {
             transform: scale(1.1);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .fab-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .fab-success {
+            background: var(--secondary-color);
+            color: white;
         }
         
         .modal {
@@ -197,6 +430,12 @@
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(5px);
             z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .modal-content {
@@ -204,52 +443,107 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 12px;
             width: 90%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translate(-50%, -60%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
         }
         
         .modal-header {
-            font-size: 1.3em;
+            font-size: 1.5em;
             font-weight: bold;
             margin-bottom: 20px;
-            color: #2c3e50;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
         }
         
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         .form-label {
             display: block;
-            margin-bottom: 5px;
-            color: #666;
-            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
         
-        .form-input {
+        .form-input, .form-select {
             width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
+            padding: 12px;
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 1em;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
             transition: border-color 0.3s ease;
         }
         
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: var(--primary-color);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .success-message, .error-message, .warning-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+        
+        .error-message {
+            background: rgba(255, 82, 82, 0.2);
+            color: #ff5252;
+            border: 1px solid #ff5252;
+        }
+        
+        .warning-message {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+            border: 1px solid #ff9800;
         }
         
         .loading {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -259,53 +553,155 @@
             100% { transform: rotate(360deg); }
         }
         
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
         }
         
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .zones-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .zone-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🌱 Smart Irrigation Controller</h1>
-            <p>Automated garden watering with weather intelligence</p>
+            <h1>💧 Smart Irrigation Controller</h1>
+            <p class="subtitle">Intelligent water management for your garden</p>
         </div>
         
-        <div class="weather-info">
-            <div class="weather-header">Weather Provider: OpenWeatherMap</div>
-            <div style="text-align: center; color: #666;">
-                Next weather check in <span id="next-check">--</span> minutes
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="active-zones">0</div>
+                <div class="stat-label">Active Zones</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="water-saved">0L</div>
+                <div class="stat-label">Water Saved Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="next-run">--:--</div>
+                <div class="stat-label">Next Scheduled Run</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="weather-status">--</div>
+                <div class="stat-label">Weather Status</div>
             </div>
         </div>
         
-        <div class="status-grid" id="zones-container">
+        <div class="weather-section">
+            <div class="weather-header">
+                <h2>🌦️ Weather Conditions</h2>
+                <button class="btn btn-secondary" onclick="checkWeather()">
+                    <span>🔄</span> Refresh
+                </button>
+            </div>
+            <div class="weather-content" id="weather-content">
+                <div class="weather-item">
+                    <div class="detail-label">Forecast Rain (24h)</div>
+                    <div class="detail-value" id="forecast-rain">-- mm</div>
+                </div>
+                <div class="weather-item">
+                    <div class="detail-label">Rain Chance</div>
+                    <div class="detail-value" id="rain-chance">--%</div>
+                </div>
+                <div class="weather-item">
+                    <div class="detail-label">Recent Rain (24h)</div>
+                    <div class="detail-value" id="recent-rain">-- mm</div>
+                </div>
+                <div class="weather-item">
+                    <div class="detail-label">Weather Decision</div>
+                    <div class="detail-value" id="weather-decision">--</div>
+                </div>
+            </div>
+        </div>
+        
+        <h2 style="margin-bottom: 20px;">🌱 Irrigation Zones</h2>
+        <div class="zones-grid" id="zones-container">
             <!-- Zone cards will be populated by JavaScript -->
         </div>
     </div>
     
-    <button class="refresh-btn" onclick="refreshData()" title="Refresh Data">
-        🔄
-    </button>
+    <div class="quick-actions">
+        <button class="fab fab-success tooltip" onclick="runAllZones(false)" title="Run All Zones">
+            <span>▶️</span>
+            <span class="tooltiptext">Run all enabled zones</span>
+        </button>
+        <button class="fab fab-primary tooltip" onclick="openTestMode()" title="Test Mode">
+            <span>🧪</span>
+            <span class="tooltiptext">Test all zones (1 min each)</span>
+        </button>
+    </div>
     
-    <!-- Manual Run Modal -->
-    <div id="manual-run-modal" class="modal">
+    <!-- Zone Control Modal -->
+    <div id="zone-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">Manual Zone Control</div>
+            <div class="modal-header">Zone Control</div>
             <div class="form-group">
                 <label class="form-label">Zone:</label>
-                <select id="zone-select" class="form-input">
+                <select id="zone-select" class="form-select">
                     <!-- Options populated by JavaScript -->
                 </select>
             </div>
@@ -313,23 +709,447 @@
                 <label class="form-label">Duration (minutes):</label>
                 <input type="number" id="duration-input" class="form-input" min="1" max="120" value="15">
             </div>
+            <div class="form-group">
+                <label class="form-label">Mode:</label>
+                <select id="mode-select" class="form-select">
+                    <option value="normal">Normal Run</option>
+                    <option value="test">Test Mode (1 min max)</option>
+                </select>
+            </div>
             <div class="controls">
-                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="runZone()">Run Zone</button>
+                <button class="btn btn-secondary" onclick="closeModal('zone-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="runZone()">
+                    <span>▶️</span> Start Irrigation
+                </button>
             </div>
             <div id="modal-message"></div>
         </div>
     </div>
     
+    <!-- Zone Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Zone Settings</div>
+            <input type="hidden" id="settings-zone-name">
+            <div class="form-group">
+                <label class="form-label">Duration (minutes):</label>
+                <input type="number" id="settings-duration" class="form-input" min="1" max="120">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Schedule Time:</label>
+                <input type="time" id="settings-schedule" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Days:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="day-mon" value="mon">
+                        <label for="day-mon">Mon</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="day-tue" value="tue">
+                        <label for="day-tue">Tue</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="day-wed" value="wed">
+                        <label for="day-wed">Wed</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="day-thu" value="thu">
+                        <label for="day-thu">Thu</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="day-fri" value="fri">
+                        <label for="day-fri">Fri</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="day-sat" value="sat">
+                        <label for="day-sat">Sat</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="day-sun" value="sun">
+                        <label for="day-sun">Sun</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Moisture Threshold (%):</label>
+                <input type="number" id="settings-moisture" class="form-input" min="0" max="100">
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="closeModal('settings-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="saveZoneSettings()">
+                    <span>💾</span> Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         let statusData = null;
+        let weatherData = null;
         
-        function refreshData() {
-            fetch('/api/status')
-                .then(response => response.json())
-                .then(data => {
-                    statusData = data;
-                    updateZoneCards();
-                    updateZoneSelect();
-                })
-                .catch(error => {
+        function getZoneIcon(zoneType) {
+            const icons = {
+                'lawn': '🌿',
+                'garden': '🌻',
+                'drip': '💧',
+                'flowers': '🌺',
+                'trees': '🌳'
+            };
+            return icons[zoneType] || '🌱';
+        }
+        
+        function formatTime(isoString) {
+            if (!isoString) return '--:--';
+            const date = new Date(isoString);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function formatDate(isoString) {
+            if (!isoString) return 'Never';
+            const date = new Date(isoString);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return `${Math.floor(diff / 60000)} min ago`;
+            if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
+            return date.toLocaleDateString();
+        }
+        
+        function updateStats() {
+            if (!statusData) return;
+            
+            // Active zones
+            const activeZones = statusData.zones.filter(z => z.enabled).length;
+            document.getElementById('active-zones').textContent = activeZones;
+            
+            // Water saved
+            const waterSaved = statusData.stats.water_saved || 0;
+            document.getElementById('water-saved').textContent = `${waterSaved.toFixed(0)}L`;
+            
+            // Next run
+            let nextRun = null;
+            const now = new Date();
+            statusData.zones.forEach(zone => {
+                if (zone.enabled && zone.next_scheduled) {
+                    const schedTime = new Date(zone.next_scheduled);
+                    if (schedTime > now && (!nextRun || schedTime < nextRun)) {
+                        nextRun = schedTime;
+                    }
+                }
+            });
+            document.getElementById('next-run').textContent = nextRun ? formatTime(nextRun.toISOString()) : 'None';
+            
+            // Weather status
+            if (weatherData) {
+                const decision = weatherData.skip_irrigation ? 'Skip' : 
+                                weatherData.reduce_duration ? 'Reduce' : 'Normal';
+                document.getElementById('weather-status').textContent = decision;
+            }
+        }
+        
+        function updateZoneCards() {
+            const container = document.getElementById('zones-container');
+            container.innerHTML = '';
+            
+            statusData.zones.forEach(zone => {
+                const card = document.createElement('div');
+                card.className = `zone-card ${zone.status}`;
+                card.innerHTML = `
+                    <div class="zone-header">
+                        <div class="zone-name">
+                            <div class="zone-type-icon">${getZoneIcon(zone.zone_type)}</div>
+                            ${zone.name}
+                        </div>
+                        <span class="status-badge status-${zone.enabled ? zone.status : 'disabled'}">
+                            ${zone.enabled ? zone.status : 'disabled'}
+                        </span>
+                    </div>
+                    <div class="zone-body">
+                        <div class="zone-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Schedule</div>
+                                <div class="detail-value">${zone.schedule} - ${zone.days.join(', ')}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Duration</div>
+                                <div class="detail-value">${zone.duration} minutes</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Last Run</div>
+                                <div class="detail-value">${formatDate(zone.last_run)}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Water Used</div>
+                                <div class="detail-value">${zone.total_water_used.toFixed(1)}L</div>
+                            </div>
+                        </div>
+                        
+                        ${(zone.moisture_sensor || zone.flow_sensor) ? `
+                        <div class="sensor-readings">
+                            ${zone.moisture_sensor ? `
+                            <div class="sensor-item">
+                                <div class="sensor-icon">💧</div>
+                                <div class="sensor-value">--</div>
+                                <div class="detail-label">Moisture</div>
+                            </div>
+                            ` : ''}
+                            ${zone.flow_sensor ? `
+                            <div class="sensor-item">
+                                <div class="sensor-icon">🌊</div>
+                                <div class="sensor-value">${zone.current_flow.toFixed(1)}</div>
+                                <div class="detail-label">Flow (L/min)</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
+                        
+                        <div class="controls">
+                            <button class="btn btn-primary" onclick="openZoneModal('${zone.name}')">
+                                <span>▶️</span> Run
+                            </button>
+                            <button class="btn btn-secondary" onclick="openSettingsModal('${zone.name}')">
+                                <span>⚙️</span> Settings
+                            </button>
+                            <label class="toggle-switch">
+                                <input type="checkbox" ${zone.enabled ? 'checked' : ''} 
+                                       onchange="toggleZone('${zone.name}', this.checked)">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            updateZoneSelect();
+        }
+        
+        function updateZoneSelect() {
+            const select = document.getElementById('zone-select');
+            select.innerHTML = '';
+            
+            statusData.zones.forEach(zone => {
+                const option = document.createElement('option');
+                option.value = zone.name;
+                option.textContent = zone.name;
+                select.appendChild(option);
+            });
+        }
+        
+        function openZoneModal(zoneName) {
+            const zone = statusData.zones.find(z => z.name === zoneName);
+            if (zone) {
+                document.getElementById('zone-select').value = zoneName;
+                document.getElementById('duration-input').value = zone.duration;
+                document.getElementById('modal-message').innerHTML = '';
+                document.getElementById('zone-modal').style.display = 'block';
+            }
+        }
+        
+        function openSettingsModal(zoneName) {
+            const zone = statusData.zones.find(z => z.name === zoneName);
+            if (zone) {
+                document.getElementById('settings-zone-name').value = zoneName;
+                document.getElementById('settings-duration').value = zone.duration;
+                document.getElementById('settings-schedule').value = zone.schedule;
+                document.getElementById('settings-moisture').value = zone.moisture_threshold;
+                
+                // Set days
+                ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+                    document.getElementById(`day-${day}`).checked = zone.days.includes(day);
+                });
+                
+                document.getElementById('settings-modal').style.display = 'block';
+            }
+        }
+        
+        function openTestMode() {
+            if (confirm('Run test mode for all zones? Each zone will run for 1 minute.')) {
+                runAllZones(true);
+            }
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        async function runZone() {
+            const zoneName = document.getElementById('zone-select').value;
+            const duration = parseInt(document.getElementById('duration-input').value);
+            const mode = document.getElementById('mode-select').value;
+            const testMode = mode === 'test';
+            
+            const messageEl = document.getElementById('modal-message');
+            messageEl.innerHTML = '<div class="loading"></div> Starting irrigation...';
+            
+            try {
+                const response = await fetch('/api/run_zone', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        zone_name: zoneName, 
+                        duration: duration,
+                        test_mode: testMode
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    messageEl.innerHTML = '<div class="success-message">✅ Irrigation started successfully!</div>';
+                    setTimeout(() => {
+                        closeModal('zone-modal');
+                        refreshData();
+                    }, 2000);
+                } else {
+                    messageEl.innerHTML = `<div class="error-message">❌ ${data.error}</div>`;
+                }
+            } catch (error) {
+                messageEl.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function runAllZones(testMode) {
+            if (!confirm(`Start ${testMode ? 'test' : 'normal'} irrigation for all enabled zones?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/run_all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ test_mode: testMode })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('All zones started successfully!');
+                    refreshData();
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        async function toggleZone(zoneName, enabled) {
+            try {
+                const response = await fetch('/api/toggle_zone', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ zone_name: zoneName, enabled: enabled })
+                });
+                
+                const data = await response.json();
+                if (!data.success) {
+                    alert(`Error: ${data.error}`);
+                }
+                refreshData();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        async function saveZoneSettings() {
+            const zoneName = document.getElementById('settings-zone-name').value;
+            const days = [];
+            ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+                if (document.getElementById(`day-${day}`).checked) {
+                    days.push(day);
+                }
+            });
+            
+            const settings = {
+                zone_name: zoneName,
+                duration: parseInt(document.getElementById('settings-duration').value),
+                schedule: document.getElementById('settings-schedule').value,
+                days: days,
+                moisture_threshold: parseInt(document.getElementById('settings-moisture').value)
+            };
+            
+            try {
+                const response = await fetch('/api/update_zone', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    closeModal('settings-modal');
+                    refreshData();
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+        
+        async function checkWeather() {
+            try {
+                const response = await fetch('/api/weather_check');
+                const data = await response.json();
+                weatherData = data;
+                
+                if (data.error) {
+                    document.getElementById('weather-decision').textContent = 'Error';
+                } else {
+                    const details = data.details || {};
+                    document.getElementById('forecast-rain').textContent = 
+                        `${(details.forecast_rain || 0).toFixed(1)} mm`;
+                    document.getElementById('rain-chance').textContent = 
+                        `${(details.rain_chance || 0).toFixed(0)}%`;
+                    document.getElementById('recent-rain').textContent = 
+                        `${(details.recent_rain || 0).toFixed(1)} mm`;
+                    
+                    const decision = data.skip_irrigation ? 'Skip Irrigation' : 
+                                    data.reduce_duration ? 'Reduce Duration' : 'Normal Schedule';
+                    document.getElementById('weather-decision').textContent = decision;
+                    
+                    if (data.reason) {
+                        document.getElementById('weather-decision').title = data.reason;
+                    }
+                }
+                
+                updateStats();
+            } catch (error) {
+                console.error('Weather check error:', error);
+            }
+        }
+        
+        async function refreshData() {
+            try {
+                const response = await fetch('/api/status');
+                statusData = await response.json();
+                updateZoneCards();
+                updateStats();
+            } catch (error) {
+                console.error('Error fetching status:', error);
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+            checkWeather();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshData, 30000);
+            
+            // Weather check every 5 minutes
+            setInterval(checkWeather, 300000);
+        });
+    </script>
+</body>
+</html>
