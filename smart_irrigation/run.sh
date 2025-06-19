@@ -1,28 +1,17 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -e
 
 CONFIG_PATH=/data/options.json
 
 echo "Starting Smart Irrigation Controller..."
 
-# Check if config exists
 if [ ! -f "$CONFIG_PATH" ]; then
-    echo "ERROR: Configuration file not found at $CONFIG_PATH!"
+    echo "ERROR: Configuration file not found!"
     exit 1
 fi
 
-# Display configuration
-echo "Configuration loaded from $CONFIG_PATH"
-
-# Activate virtual environment
-source /opt/venv/bin/activate
-
-# Change to app directory
+echo "Configuration loaded"
 cd /app
-
-# Create logs directory if it doesn't exist
 mkdir -p /app/logs
-
-# Start the application with proper error handling
 echo "Starting irrigation controller..."
 exec python3 -u main.py 2>&1 | tee /app/logs/irrigation.log
