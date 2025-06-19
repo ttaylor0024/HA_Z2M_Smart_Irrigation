@@ -3,25 +3,16 @@ FROM $BUILD_FROM
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV FLASK_APP=main.py
 
-# Install system packages
+# Install only essential packages (remove problematic build tools)
 RUN apk add --no-cache \
     python3 \
     py3-pip \
-    py3-wheel \
     curl \
-    bash \
-    gcc \
-    musl-dev \
-    python3-dev
+    bash
 
-# Create virtual environment and install Python packages
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-# Install Python packages
-RUN pip install --no-cache-dir \
+# Install Python packages directly (avoid compilation)
+RUN pip3 install --no-cache-dir \
     flask==3.0.0 \
     pyyaml==6.0.1 \
     requests==2.31.0 \
@@ -29,16 +20,13 @@ RUN pip install --no-cache-dir \
     schedule==1.2.0 \
     python-dateutil==2.8.2
 
-# Copy application files
+# Copy application files (keep your existing structure)
 COPY run.sh /
-COPY main.py /app/
+COPY app/main.py /app/main.py
 COPY templates/ /app/templates/
 COPY static/ /app/static/
 
-# Remove duplicate main.py if exists
-RUN rm -f /app/app/main.py || true
-
-# Create necessary directories
+# Create necessary directories and set permissions
 RUN mkdir -p /data /app/logs && \
     chmod +x /run.sh
 
