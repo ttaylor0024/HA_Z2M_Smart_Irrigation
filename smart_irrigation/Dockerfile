@@ -1,14 +1,17 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
+# Set environment variables
 ENV PYTHONUNBUFFERED=1
 
+# Install only essential packages
 RUN apk add --no-cache \
     python3 \
     py3-pip \
     curl \
     bash
 
+# Install Python packages directly
 RUN pip3 install --no-cache-dir \
     flask==3.0.0 \
     pyyaml==6.0.1 \
@@ -17,15 +20,20 @@ RUN pip3 install --no-cache-dir \
     schedule==1.2.0 \
     python-dateutil==2.8.2
 
+# Copy application files - CORRECT PATHS
 COPY run.sh /
 COPY app/main.py /app/main.py
 COPY templates/ /app/templates/
 
-RUN chmod +x /run.sh && \
-    mkdir -p /data /app/logs
+# Create necessary directories and set permissions
+RUN mkdir -p /data /app/logs && \
+    chmod +x /run.sh
 
+# Set working directory
 WORKDIR /app
 
+# Expose port
 EXPOSE 8080
 
-CMD ["python3", "-u", "/app/main.py"]
+# Run
+CMD ["/run.sh"]
