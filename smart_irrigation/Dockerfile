@@ -1,29 +1,31 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install only essential packages
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+
+# Install system packages
 RUN apk add --no-cache \
     python3 \
     py3-pip \
-    curl
+    curl \
+    bash
 
-# Install Python packages one by one to isolate issues
-RUN pip3 install --no-cache-dir flask
-RUN pip3 install --no-cache-dir pyyaml
-RUN pip3 install --no-cache-dir requests
-RUN pip3 install --no-cache-dir aiohttp
-RUN pip3 install --no-cache-dir schedule
+# Install Python packages directly (no requirements.txt)
+RUN pip3 install --no-cache-dir \
+    flask \
+    pyyaml \
+    requests \
+    aiohttp \
+    schedule
 
 # Copy application files
 COPY run.sh /
 COPY app/ /app/
 COPY templates/ /app/templates/
 
-# Set permissions
-RUN chmod a+x /run.sh
-
-# Create directories
-RUN mkdir -p /data
+# Create data directory and set permissions
+RUN mkdir -p /data && chmod +x /run.sh
 
 # Expose port
 EXPOSE 8080
