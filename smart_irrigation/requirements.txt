@@ -1,2 +1,5 @@
-paho-mqtt
+aiohttp
+flask
+pyyaml
+schedule
 requests
