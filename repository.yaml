@@ -1,8 +1,3 @@
-repository: "https://github.com/ttaylor0024/HA_Z2M_Smart_Irrigation"
-name: "Z2M Smart Irrigation"
-slug: "z2m_smart_irrigation"
-maintainers:
-  - "ttaylor0024"
-categories:
-  - "automation"
-homeassistant: "2021.6.0"
+name: "Smart Irrigation Add-ons by ttaylor0024"
+url: "https://github.com/ttaylor0024/HA_Z2M_Smart_Irrigation"
+maintainer: "ttaylor0024"
