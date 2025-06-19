@@ -14,6 +14,9 @@ fi
 # Display configuration
 echo "Configuration loaded from $CONFIG_PATH"
 
+# Activate virtual environment
+source /opt/venv/bin/activate
+
 # Change to app directory
 cd /app
 
