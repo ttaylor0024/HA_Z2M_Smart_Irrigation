@@ -28,4 +28,4 @@ WORKDIR /app
 
 EXPOSE 8080
 
-CMD ["/run.sh"]
+CMD ["python3", "-u", "/app/main.py"]
