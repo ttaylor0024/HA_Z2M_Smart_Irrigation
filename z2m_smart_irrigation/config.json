@@ -1,0 +1,31 @@
+{
+  "name": "Z2M Smart Irrigation",
+  "version": "1.0.0",
+  "slug": "z2m_smart_irrigation",
+  "description": "Automated watering based on forecast and past rainfall.",
+  "arch": ["amd64", "armv7", "armhf", "aarch64"],
+  "startup": "services",
+  "boot": "auto",
+  "host_network": true,
+  "homeassistant": "2021.6.0",
+  "options": {
+    "valve_topics": ["garden/valve_front", "garden/valve_back"],
+    "latitude": 40.0,
+    "longitude": -75.0,
+    "forecast_threshold_pct": 50,
+    "forecast_window_hours": 6,
+    "rain_threshold_mm": 5,
+    "rain_window_hours": 24,
+    "target_water_minutes": 10
+  },
+  "schema": {
+    "valve_topics": ["string"],
+    "latitude": "float",
+    "longitude": "float",
+    "forecast_threshold_pct": "number",
+    "forecast_window_hours": "number",
+    "rain_threshold_mm": "number",
+    "rain_window_hours": "number",
+    "target_water_minutes": "number"
+  }
+}
