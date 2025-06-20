@@ -323,22 +323,48 @@ class SmartIrrigationController:
             'weather_skip_count': 0
         }
         
-    def _load_config(self, config_path: str) -> Dict:
-        """Load add-on configuration"""
-        try:
-            with open(config_path, 'r') as f:
-                return json.load(f)
-        except FileNotFoundError:
-            logger.error(f"Config file not found: {config_path}")
-            # Return default config
-            return {
-                'weather_provider': 'openweathermap',
-                'weather_api_key': '',
-                'latitude': 0.0,
-                'longitude': 0.0,
-                'units': 'metric',
-                'zones': []
+    def _load_config(self, config_path: str = "/data/options.json") -> Dict:
+    """Load add-on configuration"""
+    try:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+            logger.info(f"Loaded config: {config}")
+            return config
+    except FileNotFoundError:
+        logger.error(f"Config file not found: {config_path}")
+        # Return a test configuration
+        return {
+            'weather_provider': 'openweathermap',
+            'weather_api_key': 'test',
+            'latitude': 40.7128,
+            'longitude': -74.0060,
+            'units': 'metric',
+            'zones': [{
+                'name': 'Test Zone',
+                'entity_id': 'switch.test',
+                'enabled': True,
+                'zone_type': 'lawn',
+                'duration': 15,
+                'schedule': '06:00',
+                'days': ['mon', 'wed', 'fri'],
+                'flow_sensor': '',
+                'moisture_sensor': '',
+                'moisture_threshold': 30
+            }],
+            'rain_forecast': {
+                'enabled': True,
+                'threshold_mm': 5.0,
+                'hours_ahead': 24,
+                'skip_percentage': 70
+            },
+            'recent_rain': {
+                'enabled': True,
+                'threshold_mm': 10.0,
+                'hours_back': 24,
+                'compensation_enabled': True,
+                'compensation_ratio': 0.5
             }
+        }
     
     def _create_zones(self) -> List[IrrigationZone]:
         """Create zone objects from configuration"""
@@ -603,7 +629,10 @@ class SmartIrrigationController:
         }
 
 # Flask web interface
-app = Flask(__name__)
+import os
+template_dir = os.path.abspath('/app/templates')
+logger.info(f"Template directory: {template_dir}")
+app = Flask(__name__, template_folder=template_dir)
 irrigation_controller = None
 
 @app.route('/')
@@ -618,7 +647,9 @@ def index():
 def api_status():
     """API endpoint for status"""
     if irrigation_controller:
-        return jsonify(irrigation_controller.get_status())
+        status = irrigation_controller.get_status()
+        logger.info(f"Returning status: {status}")
+        return jsonify(status)
     return jsonify({'error': 'Controller not initialized'})
 
 @app.route('/api/run_zone', methods=['POST'])
