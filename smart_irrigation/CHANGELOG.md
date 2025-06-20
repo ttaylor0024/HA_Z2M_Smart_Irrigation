@@ -1,7 +1,7 @@
 # Changelog
 
-## [1.0.5] - 2025-06-19
- - fix for run.sh and Dockerfile
+## [1.1.0] - 2025-06-20
+ - Now starts via add-on repo, webservice opens.
 
 ## [1.0.0] - 2025-06-19
 
