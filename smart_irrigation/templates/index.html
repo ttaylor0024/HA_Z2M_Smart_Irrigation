@@ -661,7 +661,10 @@
             <div class="weather-content" id="weather-content">
                 <div class="weather-item">
                     <div class="detail-label">Forecast Rain (24h)</div>
-                    <div class="detail-value" id="forecast-rain">-- mm</div>
+                    <div class="detail-value" id="forecast-rain">
+                      {{ status.stats.details.forecast_rain | default('--') }}
+                      {{ 'mm' if status.units == 'metric' else 'in' }}
+                    </div>
                 </div>
                 <div class="weather-item">
                     <div class="detail-label">Rain Chance</div>
@@ -669,7 +672,10 @@
                 </div>
                 <div class="weather-item">
                     <div class="detail-label">Recent Rain (24h)</div>
-                    <div class="detail-value" id="recent-rain">-- mm</div>
+                    <div class="detail-value" id="recent-rain">
+                      {{ status.stats.details.recent_rain | default('--') }}
+                      {{ 'mm' if status.units == 'metric' else 'in' }}
+                    </div>
                 </div>
                 <div class="weather-item">
                     <div class="detail-label">Weather Decision</div>
