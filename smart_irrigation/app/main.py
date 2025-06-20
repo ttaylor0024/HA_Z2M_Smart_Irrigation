@@ -654,6 +654,7 @@ def api_status():
     return jsonify({'error': 'Controller not initialized'})
 
 @app.route('/api/run_zone', methods=['POST'])
+@app.route('/api/run_zone', methods=['POST'])
 def api_run_zone():
     """API endpoint to manually run a zone"""
     data = request.json
@@ -661,13 +662,18 @@ def api_run_zone():
     duration = data.get('duration')
     test_mode = data.get('test_mode', False)
     
-    if irrigation_controller:
+    if irrigation_controller and main_loop:
         zone = next((z for z in irrigation_controller.zones if z.name == zone_name), None)
         if zone:
-            asyncio.create_task(irrigation_controller.run_zone(zone, duration, test_mode))
+            # Use run_coroutine_threadsafe to schedule the task on the main loop
+            # This is a "fire-and-forget" action, so we don't need to wait for the result.
+            asyncio.run_coroutine_threadsafe(
+                irrigation_controller.run_zone(zone, duration, test_mode),
+                main_loop
+            )
             return jsonify({'success': True, 'message': f'Started {zone_name}'})
     
-    return jsonify({'error': 'Zone not found'})
+    return jsonify({'error': 'Zone not found or controller not ready'})
 
 @app.route('/api/run_all', methods=['POST'])
 def api_run_all():
@@ -675,8 +681,12 @@ def api_run_all():
     data = request.json
     test_mode = data.get('test_mode', False)
     
-    if irrigation_controller:
-        asyncio.create_task(irrigation_controller.run_all_zones(test_mode))
+    if irrigation_controller and main_loop:
+        # Use run_coroutine_threadsafe to schedule the task on the main loop
+        asyncio.run_coroutine_threadsafe(
+            irrigation_controller.run_all_zones(test_mode),
+            main_loop
+        )
         return jsonify({'success': True, 'message': 'Started all zones'})
     
     return jsonify({'error': 'Controller not initialized'})
