@@ -695,6 +695,11 @@ def api_update_zone():
     
     return jsonify({'error': 'Zone not found'})
 
+@app.route('/health')
+def health():
+    """Health check endpoint"""
+    return jsonify({'status': 'healthy', 'time': datetime.now().isoformat()})
+
 async def main():
     """Main application entry point"""
     global irrigation_controller
@@ -704,19 +709,21 @@ async def main():
     # Initialize controller
     irrigation_controller = SmartIrrigationController()
     
-    # Main loop - check every minute without schedule library
-    while True:
-        # Run irrigation check every minute
-        await irrigation_controller.process_scheduled_irrigation()
-        await asyncio.sleep(60)  # Wait 60 seconds
-    
     # Start web server in separate thread
     def run_web_server():
+        logger.info("Starting web server on port 8080...")
         app.run(host='0.0.0.0', port=8080, debug=False)
     
     web_thread = threading.Thread(target=run_web_server)
     web_thread.daemon = True
     web_thread.start()
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    
+    logger.info("Web server thread started")
+    
+    # Give the web server time to start
+    await asyncio.sleep(2)
+    
+    # Main loop - check every minute
+    while True:
+        await irrigation_controller.process_scheduled_irrigation()
+        await asyncio.sleep(60)
