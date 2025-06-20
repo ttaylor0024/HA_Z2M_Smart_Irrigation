@@ -1,5 +1,5 @@
-#!/usr/bin/with-contenv bashio
+#!/usr/bin/env bashio
 
-echo "Starting Smart Irrigation Controller..."
+bashio::log.info "Starting Smart Irrigation Controller..."
 cd /app
 exec python3 -u main.py
