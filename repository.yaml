@@ -1,6 +1,6 @@
 add-ons:
   - name: Smart Irrigation Controller
     slug: smart_irrigation
-    version: 1.0.2
+    version: 1.0.3
     description: Automated irrigation with weather-smart Z2M valve control
     location: smart_irrigation
