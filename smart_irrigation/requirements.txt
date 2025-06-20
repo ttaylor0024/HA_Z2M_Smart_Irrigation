@@ -1,0 +1,6 @@
+flask>=2.0.0,<4.0.0
+pyyaml>=5.0.0
+requests>=2.0.0
+aiohttp>=3.0.0
+schedule>=1.0.0
+python-dateutil>=2.8.0
