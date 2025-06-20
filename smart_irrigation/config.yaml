@@ -1,5 +1,5 @@
 name: Smart Irrigation Controller
-version: "1.0.8"
+version: "1.0.9"
 slug: smart_irrigation
 description: Automated irrigation system with weather intelligence and Z2M valve control
 url: https://github.com/ttaylor0024/HA_Z2M_Smart_Irrigation
