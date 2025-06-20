@@ -328,7 +328,7 @@ class SmartIrrigationController:
         try:
             with open(config_path, 'r') as f:
                 config = json.load(f)
-            logger.info(f"Loaded config: {config}")
+                logger.info(f"Loaded config: {config}")
                 return config
         except FileNotFoundError:
             logger.error(f"Config file not found: {config_path}")
