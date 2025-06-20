@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.0.2] - 2025-06-19
+ - fix for run.sh and Dockerfile
+
 ## [1.0.0] - 2025-06-19
 
 ### Added
