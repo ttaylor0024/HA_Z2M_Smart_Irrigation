@@ -1,5 +1,4 @@
-#!/bin/bash
-set -e
+#!/usr/bin/with-contenv bashio
 
 echo "Starting Smart Irrigation Controller..."
 cd /app
