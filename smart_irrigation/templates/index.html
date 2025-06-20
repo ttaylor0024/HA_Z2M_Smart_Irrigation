@@ -1028,7 +1028,7 @@
             messageEl.innerHTML = '<div class="loading"></div> Starting irrigation...';
             
             try {
-                const response = await fetch('/api/run_zone', {
+                const response = await fetch('api/run_zone', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -1059,7 +1059,7 @@
             }
             
             try {
-                const response = await fetch('/api/run_all', {
+                const response = await fetch('api/run_all', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ test_mode: testMode })
@@ -1079,7 +1079,7 @@
         
         async function toggleZone(zoneName, enabled) {
             try {
-                const response = await fetch('/api/toggle_zone', {
+                const response = await fetch('api/toggle_zone', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ zone_name: zoneName, enabled: enabled })
@@ -1113,7 +1113,7 @@
             };
             
             try {
-                const response = await fetch('/api/update_zone', {
+                const response = await fetch('api/update_zone', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(settings)
@@ -1133,7 +1133,13 @@
         
         async function checkWeather() {
             try {
-                const response = await fetch('/api/weather_check');
+                const response = await fetch('api/weather_check');
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Network response was not ok: ${response.status}. Response: ${errorText}`);
+                }
+                    
                 const data = await response.json();
                 weatherData = data;
                 
@@ -1162,12 +1168,13 @@
                 updateStats();
             } catch (error) {
                 console.error('Weather check error:', error);
+                document.getElementById('weather-decision').textContent = 'Request Failed';
             }
         }
         
         async function refreshData() {
             try {
-                const response = await fetch('/api/status');
+                const response = await fetch('api/status');
                 statusData = await response.json();
                 updateZoneCards();
                 updateStats();
