@@ -1,7 +1,7 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install only Alpine packages
+# Install only Alpine packages - no pip needed
 RUN apk add --no-cache \
     python3 \
     py3-flask \
@@ -12,16 +12,15 @@ RUN apk add --no-cache \
     bash
 
 # Copy application files
-COPY run.sh /
 COPY app/main.py /app/main.py
 COPY templates/ /app/templates/
 
-# Set permissions
-RUN chmod +x /run.sh && \
+# Copy rootfs with s6 service definition
+COPY rootfs /
+
+# Set permissions and create directories
+RUN chmod +x /etc/services.d/irrigation/run && \
     mkdir -p /data /app/logs
 
 WORKDIR /app
 EXPOSE 8080
-
-# Use the s6-overlay compatible CMD format
-CMD [ "/run.sh" ]
