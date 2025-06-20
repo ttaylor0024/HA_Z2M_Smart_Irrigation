@@ -970,7 +970,7 @@
 
         async function initChart() {
             try {
-                const response = await fetch('api/history');
+                const response = await fetch('./api/history');
                 if (!response.ok) throw new Error('Failed to fetch history');
                 const historyData = await response.json();
                 
@@ -1013,7 +1013,7 @@
         
         async function stopZone(zoneName) {
             try {
-                const response = await fetch('api/stop_zone', {
+                const response = await fetch('./api/stop_zone', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ zone_name: zoneName })
@@ -1090,7 +1090,7 @@
         }
 
         function runZone() {
-            postAPI('api/run_zone', {
+            postAPI('./api/run_zone', {
                 zone_name: document.getElementById('zone-select').value,
                 duration: parseInt(document.getElementById('duration-input').value),
                 test_mode: document.getElementById('mode-select').value === 'test'
@@ -1099,12 +1099,12 @@
         
         function runAllZones(testMode) {
             if (confirm(`Start ${testMode ? 'test' : 'normal'} irrigation for all enabled zones?`)) {
-                postAPI('api/run_all', { test_mode: testMode });
+                postAPI('./api/run_all', { test_mode: testMode });
             }
         }
         
         function toggleZone(zoneName, enabled) {
-            postAPI('api/toggle_zone', { zone_name: zoneName, enabled: enabled });
+            postAPI('./api/toggle_zone', { zone_name: zoneName, enabled: enabled });
         }
         
         function saveZoneSettings() {
@@ -1112,7 +1112,7 @@
             ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
                 if (document.getElementById(`day-${day}`).checked) days.push(day);
             });
-            postAPI('api/update_zone', {
+            postAPI('./api/update_zone', {
                 zone_name: document.getElementById('settings-zone-name').value,
                 duration: parseInt(document.getElementById('settings-duration').value),
                 schedule: document.getElementById('settings-schedule').value,
@@ -1123,7 +1123,7 @@
         
         async function checkWeather() {
             try {
-                const response = await fetch('api/weather_check');
+                const response = await fetch('./api/weather_check');
                 if (!response.ok) throw new Error(`Network error: ${response.statusText}`);
                 weatherData = await response.json();
                 
@@ -1147,7 +1147,7 @@
         
         async function refreshData() {
             try {
-                const response = await fetch('api/status');
+                const response = await fetch('./api/status');
                 if (!response.ok) throw new Error('Failed to fetch status');
                 statusData = await response.json();
                 updateZoneCards();
