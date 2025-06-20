@@ -1,8 +1,14 @@
 name: Smart Irrigation Controller
-version: "1.0.2"
+version: "1.0.3"
 slug: smart_irrigation
 description: Automated irrigation system with weather intelligence and Z2M valve control
 url: https://github.com/ttaylor0024/HA_Z2M_Smart_Irrigation
+build_from:
+  aarch64: "ghcr.io/home-assistant/aarch64-base:3.18"
+  amd64:   "ghcr.io/home-assistant/amd64-base:3.18"
+  armhf:   "ghcr.io/home-assistant/armhf-base:3.18"
+  armv7:   "ghcr.io/home-assistant/armv7-base:3.18"
+  i386:    "ghcr.io/home-assistant/i386-base:3.18"
 arch:
   - armhf
   - armv7
