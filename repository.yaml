@@ -1,4 +1,15 @@
-repository: https://github.com/ttaylor0024/HA_Z2M_Smart_Irrigation
+# repository.yaml (at the root of your repo)
+
+# A friendly name for your repository
+name: Tosh Taylor’s Home-Irrigation Add-Ons
+
+# (Optional) A homepage or README URL for your repo
+url: https://github.com/ttaylor0024/HA_Z2M_Smart_Irrigation
+
+# (Optional) Contact info for the maintainer(s)
+maintainer: Tosh Taylor <toshtaylor@example.com>
+
+# List of add-ons in this repo
 add-ons:
   - name: Smart Irrigation Controller
     slug: smart_irrigation
