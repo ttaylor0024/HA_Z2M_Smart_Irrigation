@@ -650,10 +650,13 @@ def api_run_all():
     return jsonify({'error': 'Controller not initialized'})
 
 @app.route('/api/weather_check', methods=['GET'])
-async def api_weather_check():
+def api_weather_check():  # Remove 'async' keyword
     """API endpoint to check current weather conditions"""
     if irrigation_controller:
-        conditions = await irrigation_controller.check_weather_conditions()
+        # Create a new event loop for the async call
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        conditions = loop.run_until_complete(irrigation_controller.check_weather_conditions())
         return jsonify(conditions)
     return jsonify({'error': 'Controller not initialized'})
 
@@ -700,8 +703,13 @@ def health():
     """Health check endpoint"""
     return jsonify({'status': 'healthy', 'time': datetime.now().isoformat()})
 
-async def main():
-    """Main application entry point"""
+def run_flask():
+    """Run Flask web server"""
+    logger.info("Starting Flask web server on port 8080...")
+    app.run(host='0.0.0.0', port=8080, debug=False)
+
+async def irrigation_loop():
+    """Main irrigation control loop"""
     global irrigation_controller
     
     logger.info("Starting Smart Irrigation Controller")
@@ -710,20 +718,24 @@ async def main():
     irrigation_controller = SmartIrrigationController()
     
     # Start web server in separate thread
-    def run_web_server():
-        logger.info("Starting web server on port 8080...")
-        app.run(host='0.0.0.0', port=8080, debug=False)
-    
-    web_thread = threading.Thread(target=run_web_server)
+    web_thread = threading.Thread(target=run_flask)
     web_thread.daemon = True
     web_thread.start()
     
-    logger.info("Web server thread started")
-    
-    # Give the web server time to start
-    await asyncio.sleep(2)
+    logger.info("Irrigation controller initialized")
     
     # Main loop - check every minute
     while True:
-        await irrigation_controller.process_scheduled_irrigation()
+        try:
+            await irrigation_controller.process_scheduled_irrigation()
+        except Exception as e:
+            logger.error(f"Error in irrigation loop: {e}")
         await asyncio.sleep(60)
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(irrigation_loop())
+    except Exception as e:
+        logger.error(f"Fatal error: {e}")
+        import traceback
+        traceback.print_exc()
