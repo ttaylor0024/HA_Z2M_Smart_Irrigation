@@ -1,7 +1,7 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install only Alpine packages - no pip needed
+# Install only Alpine packages
 RUN apk add --no-cache \
     python3 \
     py3-flask \
@@ -16,12 +16,12 @@ COPY run.sh /
 COPY app/main.py /app/main.py
 COPY templates/ /app/templates/
 
-# Set permissions and create directories
+# Set permissions
 RUN chmod +x /run.sh && \
     mkdir -p /data /app/logs
 
 WORKDIR /app
 EXPOSE 8080
 
-# IMPORTANT: Don't use CMD - let s6-overlay handle it
-# The run.sh will be executed by s6-overlay automatically
+# Use the s6-overlay compatible CMD format
+CMD [ "/run.sh" ]
