@@ -324,14 +324,14 @@ class SmartIrrigationController:
         }
         
     def _load_config(self, config_path: str = "/data/options.json") -> Dict:
-    """Load add-on configuration"""
-    try:
-        with open(config_path, 'r') as f:
-            config = json.load(f)
+        """Load add-on configuration"""
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
             logger.info(f"Loaded config: {config}")
-            return config
-    except FileNotFoundError:
-        logger.error(f"Config file not found: {config_path}")
+                return config
+        except FileNotFoundError:
+            logger.error(f"Config file not found: {config_path}")
         # Return a test configuration
         return {
             'weather_provider': 'openweathermap',
