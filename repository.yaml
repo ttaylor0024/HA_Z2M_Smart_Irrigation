@@ -1,3 +1,6 @@
-name: "Smart Irrigation Add-ons by ttaylor0024"
-url: "https://github.com/ttaylor0024/HA_Z2M_Smart_Irrigation"
-maintainer: "ttaylor0024"
+add-ons:
+  - name: Smart Irrigation Controller
+    slug: smart_irrigation
+    version: 1.0.2
+    description: Automated irrigation with weather-smart Z2M valve control
+    location: smart_irrigation
