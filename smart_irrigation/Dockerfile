@@ -11,17 +11,16 @@ RUN apk add --no-cache \
     bash \
     curl \
     libffi \
-    openssl
+    openssl \
+    yaml
 
-# 2) Install build-deps, Python packages, then drop build-deps
+# 2) Install build-time deps, Python packages, then remove build-time deps
 RUN apk add --no-cache --virtual .build-deps \
-      gcc \
-      musl-dev \
+      build-base \
       python3-dev \
       libffi-dev \
       openssl-dev \
-      libyaml-dev \
-      cargo \
+      yaml-dev \
   && pip3 install --no-cache-dir \
       flask==3.0.0 \
       pyyaml==6.0.1 \
@@ -31,12 +30,12 @@ RUN apk add --no-cache --virtual .build-deps \
       python-dateutil==2.8.2 \
   && apk del .build-deps
 
-# 3) Copy in your run script and app code
+# 3) Copy in your run script and application code
 COPY run.sh /
 COPY app/ /app/
 COPY templates/ /app/templates/
 
-# 4) Make run.sh executable and prep folders
+# 4) Mark run.sh executable, prep data directories
 RUN chmod +x /run.sh \
  && mkdir -p /data /app/logs
 
@@ -44,5 +43,5 @@ WORKDIR /app
 
 EXPOSE 8080
 
-# 5) Launch under s6-overlay (config.yaml already has init: true)
-CMD [ "/run.sh" ]
+# 5) Launch under s6-overlay (init: true in config.yaml)
+CMD ["/run.sh"]
