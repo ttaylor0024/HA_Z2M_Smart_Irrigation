@@ -23,5 +23,5 @@ RUN chmod +x /run.sh && \
 WORKDIR /app
 EXPOSE 8080
 
-# Run the application
-CMD ["/run.sh"]
+# IMPORTANT: Don't use CMD - let s6-overlay handle it
+# The run.sh will be executed by s6-overlay automatically
