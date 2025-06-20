@@ -788,6 +788,48 @@
     <script>
         let statusData = null;
         let weatherData = null;
+
+        /**
+         * Formats a volume value (from Liters) based on the selected unit system.
+         * @param {number} liters The volume in Liters.
+         * @param {string} units The unit system ('metric' or 'imperial').
+         * @returns {string} The formatted string (e.g., "10.0 L" or "2.6 gal").
+         */
+        function formatVolume(liters, units) {
+            if (units === 'imperial') {
+                const gallons = liters * 0.264172;
+                return `${gallons.toFixed(1)} gal`;
+            }
+            return `${liters.toFixed(1)} L`;
+        }
+
+        /**
+         * Formats a precipitation value. The backend already sends this in the correct unit.
+         * This function just appends the correct suffix.
+         * @param {number} value The precipitation value (mm or inches).
+         * @param {string} units The unit system ('metric' or 'imperial').
+         * @returns {string} The formatted string (e.g., "5.0 mm" or "0.2 in").
+         */
+        function formatPrecipitation(value, units) {
+            if (units === 'imperial') {
+                return `${value.toFixed(2)} in`;
+            }
+            return `${value.toFixed(1)} mm`;
+        }
+
+        /**
+         * Formats a flow rate value (from L/min) based on the selected unit system.
+         * @param {number} lpm The flow rate in Liters per minute.
+         * @param {string} units The unit system ('metric' or 'imperial').
+         * @returns {string} The formatted string (e.g., "15.0 L/min" or "4.0 GPM").
+         */
+        function formatFlow(lpm, units) {
+            if (units === 'imperial') {
+                const gpm = lpm * 0.264172;
+                return `${gpm.toFixed(1)} GPM`;
+            }
+            return `${lpm.toFixed(1)} L/min`;
+        }
         
         function getZoneIcon(zoneType) {
             const icons = {
@@ -827,7 +869,7 @@
             
             // Water saved
             const waterSaved = statusData.stats.water_saved || 0;
-            document.getElementById('water-saved').textContent = `${waterSaved.toFixed(0)}L`;
+            document.getElementById('water-saved').textContent = formatVolume(waterSaved, statusData.units);
             
             // Next run
             let nextRun = null;
@@ -883,7 +925,7 @@
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Water Used</div>
-                                <div class="detail-value">${zone.total_water_used.toFixed(1)}L</div>
+                                <div class="detail-value">${formatVolume(zone.total_water_used, statusData.units)}</div>
                             </div>
                         </div>
                         
@@ -899,8 +941,8 @@
                             ${zone.flow_sensor ? `
                             <div class="sensor-item">
                                 <div class="sensor-icon">🌊</div>
-                                <div class="sensor-value">${zone.current_flow.toFixed(1)}</div>
-                                <div class="detail-label">Flow (L/min)</div>
+                                <div class="sensor-value">${formatFlow(zone.current_flow, statusData.units)}</div>
+                                <div class="detail-label">Flow</div>
                             </div>
                             ` : ''}
                         </div>
@@ -1099,12 +1141,14 @@
                     document.getElementById('weather-decision').textContent = 'Error';
                 } else {
                     const details = data.details || {};
+                    const units = statusData ? statusData.units : 'metric';
+
                     document.getElementById('forecast-rain').textContent = 
-                        `${(details.forecast_rain || 0).toFixed(1)} mm`;
+                        formatPrecipitation(details.forecast_rain || 0, units);
                     document.getElementById('rain-chance').textContent = 
                         `${(details.rain_chance || 0).toFixed(0)}%`;
                     document.getElementById('recent-rain').textContent = 
-                        `${(details.recent_rain || 0).toFixed(1)} mm`;
+                        formatPrecipitation(details.recent_rain || 0, units);
                     
                     const decision = data.skip_irrigation ? 'Skip Irrigation' : 
                                     data.reduce_duration ? 'Reduce Duration' : 'Normal Schedule';
