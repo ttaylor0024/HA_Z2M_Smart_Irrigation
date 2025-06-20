@@ -634,6 +634,7 @@ template_dir = os.path.abspath('/app/templates')
 logger.info(f"Template directory: {template_dir}")
 app = Flask(__name__, template_folder=template_dir)
 irrigation_controller = None
+main_loop = None #+ NEW: Global variable to hold the main event loop
 
 @app.route('/')
 def index():
@@ -681,15 +682,23 @@ def api_run_all():
     return jsonify({'error': 'Controller not initialized'})
 
 @app.route('/api/weather_check', methods=['GET'])
-def api_weather_check():  # Remove 'async' keyword
+def api_weather_check():
     """API endpoint to check current weather conditions"""
-    if irrigation_controller:
-        # Create a new event loop for the async call
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        conditions = loop.run_until_complete(irrigation_controller.check_weather_conditions())
-        return jsonify(conditions)
-    return jsonify({'error': 'Controller not initialized'})
+    if irrigation_controller and main_loop:
+        try:
+            # Submit the async function to the main event loop from this (Flask) thread
+            future = asyncio.run_coroutine_threadsafe(
+                irrigation_controller.check_weather_conditions(),
+                main_loop
+            )
+            # Wait for the result and return it
+            conditions = future.result(timeout=30) # 30-second timeout
+            return jsonify(conditions)
+        except Exception as e:
+            logger.error(f"Error in api_weather_check: {e}")
+            return jsonify({'error': 'Failed to get weather conditions', 'details': str(e)}), 500
+
+    return jsonify({'error': 'Controller or event loop not initialized'}), 500
 
 @app.route('/api/toggle_zone', methods=['POST'])
 def api_toggle_zone():
@@ -741,10 +750,13 @@ def run_flask():
 
 async def irrigation_loop():
     """Main irrigation control loop"""
-    global irrigation_controller
+    global irrigation_controller, main_loop #+ NEW: Add main_loop here
     
     logger.info("Starting Smart Irrigation Controller")
     
+    #+ NEW: Capture the running event loop
+    main_loop = asyncio.get_running_loop()
+
     # Initialize controller
     irrigation_controller = SmartIrrigationController()
     
