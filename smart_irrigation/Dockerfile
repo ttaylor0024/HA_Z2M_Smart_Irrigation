@@ -1,27 +1,27 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-ENV PYTHONUNBUFFERED=1
-
-# Install all dependencies
+# Install only Alpine packages - no pip needed
 RUN apk add --no-cache \
     python3 \
-    py3-pip \
-    bash \
-    gcc \
-    musl-dev \
-    python3-dev
-
-# Copy requirements first
-COPY requirements.txt /tmp/
-RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+    py3-flask \
+    py3-yaml \
+    py3-requests \
+    py3-aiohttp \
+    py3-dateutil \
+    bash
 
 # Copy application files
 COPY run.sh /
-COPY app/ /app/
+COPY app/main.py /app/main.py
 COPY templates/ /app/templates/
 
-RUN chmod +x /run.sh && mkdir -p /data /app/logs
+# Set permissions and create directories
+RUN chmod +x /run.sh && \
+    mkdir -p /data /app/logs
+
 WORKDIR /app
 EXPOSE 8080
+
+# Run the application
 CMD ["/run.sh"]
