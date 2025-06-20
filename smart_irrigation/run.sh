@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 echo "Starting Smart Irrigation Controller..."
 cd /app
-python3 -u main.py
+exec python3 -u main.py
