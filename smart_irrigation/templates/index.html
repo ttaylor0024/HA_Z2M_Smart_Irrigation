@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Irrigation Controller</title>
+    <!-- Include Chart.js for the graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -123,6 +125,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
+            margin-top: 25px;
         }
         
         .weather-item {
@@ -157,6 +160,10 @@
         .zone-card.running {
             border-color: var(--secondary-color);
             animation: pulse 2s infinite;
+        }
+        
+        .zone-card.stopped {
+            border-color: var(--warning-color);
         }
         
         @keyframes pulse {
@@ -203,6 +210,7 @@
         .status-running { background: rgba(0, 200, 83, 0.3); color: #00c853; }
         .status-completed { background: rgba(76, 175, 80, 0.3); color: #4caf50; }
         .status-failed { background: rgba(255, 82, 82, 0.3); color: #ff5252; }
+        .status-stopped { background: rgba(255, 152, 0, 0.3); color: #ff9800; }
         .status-disabled { background: rgba(255, 152, 0, 0.3); color: #ff9800; }
         
         .zone-body {
@@ -653,11 +661,13 @@
         
         <div class="weather-section">
             <div class="weather-header">
-                <h2>🌦️ Weather Conditions</h2>
+                <h2>🌦️ Weather & Usage (Last 7 Days)</h2>
                 <button class="btn btn-secondary" onclick="checkWeather()">
                     <span>🔄</span> Refresh
                 </button>
             </div>
+            <!-- Canvas for the chart -->
+            <canvas id="usageChart"></canvas>
             <div class="weather-content" id="weather-content">
                 <div class="weather-item">
                     <div class="detail-label">Forecast Rain (24h)</div>
@@ -668,7 +678,7 @@
                     <div class="detail-value" id="rain-chance">--%</div>
                 </div>
                 <div class="weather-item">
-                    <div class="detail-label">Recent Rain (24h)</div>
+                    <div class="detail-label">Recent Rain (48h)</div>
                     <div class="detail-value" id="recent-rain">-- mm</div>
                 </div>
                 <div class="weather-item">
@@ -788,6 +798,7 @@
     <script>
         let statusData = null;
         let weatherData = null;
+        let usageChart = null;
 
         /**
          * Formats a volume value (from Liters) based on the selected unit system.
@@ -804,7 +815,7 @@
         }
 
         /**
-         * Formats a precipitation value. The backend already sends this in the correct unit.
+         * Formats a precipitation value. The backend sends this in the correct unit.
          * This function just appends the correct suffix.
          * @param {number} value The precipitation value (mm or inches).
          * @param {string} units The unit system ('metric' or 'imperial').
@@ -833,19 +844,15 @@
         
         function getZoneIcon(zoneType) {
             const icons = {
-                'lawn': '🌿',
-                'garden': '🌻',
-                'drip': '💧',
-                'flowers': '🌺',
-                'trees': '🌳'
+                'lawn': '🌿', 'garden': '🌻', 'drip': '💧',
+                'flowers': '🌺', 'trees': '🌳'
             };
             return icons[zoneType] || '🌱';
         }
         
         function formatTime(isoString) {
             if (!isoString) return '--:--';
-            const date = new Date(isoString);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
         
         function formatDate(isoString) {
@@ -853,7 +860,6 @@
             const date = new Date(isoString);
             const now = new Date();
             const diff = now - date;
-            
             if (diff < 60000) return 'Just now';
             if (diff < 3600000) return `${Math.floor(diff / 60000)} min ago`;
             if (diff < 86400000) return `${Math.floor(diff / 3600000)} hours ago`;
@@ -862,32 +868,22 @@
         
         function updateStats() {
             if (!statusData) return;
-            
-            // Active zones
-            const activeZones = statusData.zones.filter(z => z.enabled).length;
-            document.getElementById('active-zones').textContent = activeZones;
-            
-            // Water saved
+            document.getElementById('active-zones').textContent = statusData.zones.filter(z => z.enabled).length;
             const waterSaved = statusData.stats.water_saved || 0;
             document.getElementById('water-saved').textContent = formatVolume(waterSaved, statusData.units);
             
-            // Next run
             let nextRun = null;
             const now = new Date();
             statusData.zones.forEach(zone => {
                 if (zone.enabled && zone.next_scheduled) {
                     const schedTime = new Date(zone.next_scheduled);
-                    if (schedTime > now && (!nextRun || schedTime < nextRun)) {
-                        nextRun = schedTime;
-                    }
+                    if (schedTime > now && (!nextRun || schedTime < nextRun)) nextRun = schedTime;
                 }
             });
             document.getElementById('next-run').textContent = nextRun ? formatTime(nextRun.toISOString()) : 'None';
             
-            // Weather status
             if (weatherData) {
-                const decision = weatherData.skip_irrigation ? 'Skip' : 
-                                weatherData.reduce_duration ? 'Reduce' : 'Normal';
+                const decision = weatherData.skip_irrigation ? 'Skip' : weatherData.reduce_duration ? 'Reduce' : 'Normal';
                 document.getElementById('weather-status').textContent = decision;
             }
         }
@@ -895,10 +891,22 @@
         function updateZoneCards() {
             const container = document.getElementById('zones-container');
             container.innerHTML = '';
+            if (!statusData || !statusData.zones) return;
             
             statusData.zones.forEach(zone => {
                 const card = document.createElement('div');
                 card.className = `zone-card ${zone.status}`;
+                
+                let controlButtons = '';
+                if (zone.status === 'running') {
+                    controlButtons = `<button class="btn btn-danger" onclick="stopZone('${zone.name}')"><span>⏹️</span> Stop</button>`;
+                } else {
+                    controlButtons = `
+                        <button class="btn btn-primary" onclick="openZoneModal('${zone.name}')"><span>▶️</span> Run</button>
+                        <button class="btn btn-secondary" onclick="openSettingsModal('${zone.name}')"><span>⚙️</span> Settings</button>
+                    `;
+                }
+
                 card.innerHTML = `
                     <div class="zone-header">
                         <div class="zone-name">
@@ -931,33 +939,14 @@
                         
                         ${(zone.moisture_sensor || zone.flow_sensor) ? `
                         <div class="sensor-readings">
-                            ${zone.moisture_sensor ? `
-                            <div class="sensor-item">
-                                <div class="sensor-icon">💧</div>
-                                <div class="sensor-value">--</div>
-                                <div class="detail-label">Moisture</div>
-                            </div>
-                            ` : ''}
-                            ${zone.flow_sensor ? `
-                            <div class="sensor-item">
-                                <div class="sensor-icon">🌊</div>
-                                <div class="sensor-value">${formatFlow(zone.current_flow, statusData.units)}</div>
-                                <div class="detail-label">Flow</div>
-                            </div>
-                            ` : ''}
-                        </div>
-                        ` : ''}
+                            ${zone.moisture_sensor ? `<div class="sensor-item"><div class="sensor-icon">💧</div><div class="sensor-value">--</div><div class="detail-label">Moisture</div></div>` : ''}
+                            ${zone.flow_sensor ? `<div class="sensor-item"><div class="sensor-icon">🌊</div><div class="sensor-value">${formatFlow(zone.current_flow, statusData.units)}</div><div class="detail-label">Flow</div></div>` : ''}
+                        </div>` : ''}
                         
                         <div class="controls">
-                            <button class="btn btn-primary" onclick="openZoneModal('${zone.name}')">
-                                <span>▶️</span> Run
-                            </button>
-                            <button class="btn btn-secondary" onclick="openSettingsModal('${zone.name}')">
-                                <span>⚙️</span> Settings
-                            </button>
+                            ${controlButtons}
                             <label class="toggle-switch">
-                                <input type="checkbox" ${zone.enabled ? 'checked' : ''} 
-                                       onchange="toggleZone('${zone.name}', this.checked)">
+                                <input type="checkbox" ${zone.enabled ? 'checked' : ''} onchange="toggleZone('${zone.name}', this.checked)">
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -965,20 +954,76 @@
                 `;
                 container.appendChild(card);
             });
-            
             updateZoneSelect();
         }
         
         function updateZoneSelect() {
             const select = document.getElementById('zone-select');
             select.innerHTML = '';
-            
             statusData.zones.forEach(zone => {
                 const option = document.createElement('option');
                 option.value = zone.name;
                 option.textContent = zone.name;
                 select.appendChild(option);
             });
+        }
+
+        async function initChart() {
+            try {
+                const response = await fetch('api/history');
+                if (!response.ok) throw new Error('Failed to fetch history');
+                const historyData = await response.json();
+                
+                const ctx = document.getElementById('usageChart').getContext('2d');
+                if (usageChart) usageChart.destroy();
+
+                const units = statusData ? statusData.units : 'metric';
+                const waterUnit = units === 'imperial' ? 'gal' : 'L';
+                const rainUnit = units === 'imperial' ? 'in' : 'mm';
+
+                usageChart = new Chart(ctx, {
+                    type: 'line',
+                    data: historyData,
+                    options: {
+                        responsive: true,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            x: { ticks: { color: '#b0b0b0' } },
+                            y: {
+                                type: 'linear', display: true, position: 'left',
+                                title: { display: true, text: `Water Used (${waterUnit})`, color: '#00a8ff' },
+                                ticks: { color: '#00a8ff' },
+                                beginAtZero: true
+                            },
+                            y1: {
+                                type: 'linear', display: true, position: 'right',
+                                title: { display: true, text: `Rainfall (${rainUnit})`, color: '#00c853' },
+                                ticks: { color: '#00c853' },
+                                grid: { drawOnChartArea: false },
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: { legend: { labels: { color: '#ffffff' } } }
+                    }
+                });
+            } catch(error) {
+                console.error("Chart Error:", error);
+            }
+        }
+        
+        async function stopZone(zoneName) {
+            try {
+                const response = await fetch('api/stop_zone', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ zone_name: zoneName })
+                });
+                if (!response.ok) throw new Error('Stop command failed');
+                await refreshData();
+            } catch (error) {
+                console.error(`Error stopping zone: ${error.message}`);
+                alert(`Error stopping zone: ${error.message}`);
+            }
         }
         
         function openZoneModal(zoneName) {
@@ -998,12 +1043,9 @@
                 document.getElementById('settings-duration').value = zone.duration;
                 document.getElementById('settings-schedule').value = zone.schedule;
                 document.getElementById('settings-moisture').value = zone.moisture_threshold;
-                
-                // Set days
                 ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
                     document.getElementById(`day-${day}`).checked = zone.days.includes(day);
                 });
-                
                 document.getElementById('settings-modal').style.display = 'block';
             }
         }
@@ -1018,152 +1060,83 @@
             document.getElementById(modalId).style.display = 'none';
         }
         
-        async function runZone() {
-            const zoneName = document.getElementById('zone-select').value;
-            const duration = parseInt(document.getElementById('duration-input').value);
-            const mode = document.getElementById('mode-select').value;
-            const testMode = mode === 'test';
-            
+        async function postAPI(endpoint, body) {
             const messageEl = document.getElementById('modal-message');
-            messageEl.innerHTML = '<div class="loading"></div> Starting irrigation...';
-            
+            if (messageEl) messageEl.innerHTML = '<div class="loading"></div> Sending command...';
             try {
-                const response = await fetch('api/run_zone', {
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        zone_name: zoneName, 
-                        duration: duration,
-                        test_mode: testMode
-                    })
+                    body: JSON.stringify(body)
                 });
-                
-                const data = await response.json();
-                if (data.success) {
-                    messageEl.innerHTML = '<div class="success-message">✅ Irrigation started successfully!</div>';
-                    setTimeout(() => {
-                        closeModal('zone-modal');
-                        refreshData();
-                    }, 2000);
-                } else {
-                    messageEl.innerHTML = `<div class="error-message">❌ ${data.error}</div>`;
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Request failed');
                 }
+                const data = await response.json();
+                if (messageEl) {
+                    if (data.success) {
+                        messageEl.innerHTML = `<div class="success-message">✅ ${data.message || 'Success!'}</div>`;
+                        setTimeout(() => closeModal('zone-modal'), 2000);
+                    } else {
+                        messageEl.innerHTML = `<div class="error-message">❌ ${data.error}</div>`;
+                    }
+                }
+                await refreshData();
             } catch (error) {
-                messageEl.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
+                if(messageEl) messageEl.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
+                console.error(`API Error on ${endpoint}:`, error);
+            }
+        }
+
+        function runZone() {
+            postAPI('api/run_zone', {
+                zone_name: document.getElementById('zone-select').value,
+                duration: parseInt(document.getElementById('duration-input').value),
+                test_mode: document.getElementById('mode-select').value === 'test'
+            });
+        }
+        
+        function runAllZones(testMode) {
+            if (confirm(`Start ${testMode ? 'test' : 'normal'} irrigation for all enabled zones?`)) {
+                postAPI('api/run_all', { test_mode: testMode });
             }
         }
         
-        async function runAllZones(testMode) {
-            if (!confirm(`Start ${testMode ? 'test' : 'normal'} irrigation for all enabled zones?`)) {
-                return;
-            }
-            
-            try {
-                const response = await fetch('api/run_all', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ test_mode: testMode })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    alert('All zones started successfully!');
-                    refreshData();
-                } else {
-                    alert(`Error: ${data.error}`);
-                }
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
+        function toggleZone(zoneName, enabled) {
+            postAPI('api/toggle_zone', { zone_name: zoneName, enabled: enabled });
         }
         
-        async function toggleZone(zoneName, enabled) {
-            try {
-                const response = await fetch('api/toggle_zone', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ zone_name: zoneName, enabled: enabled })
-                });
-                
-                const data = await response.json();
-                if (!data.success) {
-                    alert(`Error: ${data.error}`);
-                }
-                refreshData();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
-        }
-        
-        async function saveZoneSettings() {
-            const zoneName = document.getElementById('settings-zone-name').value;
+        function saveZoneSettings() {
             const days = [];
             ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
-                if (document.getElementById(`day-${day}`).checked) {
-                    days.push(day);
-                }
+                if (document.getElementById(`day-${day}`).checked) days.push(day);
             });
-            
-            const settings = {
-                zone_name: zoneName,
+            postAPI('api/update_zone', {
+                zone_name: document.getElementById('settings-zone-name').value,
                 duration: parseInt(document.getElementById('settings-duration').value),
                 schedule: document.getElementById('settings-schedule').value,
                 days: days,
                 moisture_threshold: parseInt(document.getElementById('settings-moisture').value)
-            };
-            
-            try {
-                const response = await fetch('api/update_zone', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(settings)
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    closeModal('settings-modal');
-                    refreshData();
-                } else {
-                    alert(`Error: ${data.error}`);
-                }
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            }
+            });
         }
         
         async function checkWeather() {
             try {
                 const response = await fetch('api/weather_check');
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Network response was not ok: ${response.status}. Response: ${errorText}`);
-                }
-                    
-                const data = await response.json();
-                weatherData = data;
+                if (!response.ok) throw new Error(`Network error: ${response.statusText}`);
+                weatherData = await response.json();
                 
-                if (data.error) {
-                    document.getElementById('weather-decision').textContent = 'Error';
-                } else {
-                    const details = data.details || {};
-                    const units = statusData ? statusData.units : 'metric';
-
-                    document.getElementById('forecast-rain').textContent = 
-                        formatPrecipitation(details.forecast_rain || 0, units);
-                    document.getElementById('rain-chance').textContent = 
-                        `${(details.rain_chance || 0).toFixed(0)}%`;
-                    document.getElementById('recent-rain').textContent = 
-                        formatPrecipitation(details.recent_rain || 0, units);
-                    
-                    const decision = data.skip_irrigation ? 'Skip Irrigation' : 
-                                    data.reduce_duration ? 'Reduce Duration' : 'Normal Schedule';
-                    document.getElementById('weather-decision').textContent = decision;
-                    
-                    if (data.reason) {
-                        document.getElementById('weather-decision').title = data.reason;
-                    }
-                }
+                if (weatherData.error) throw new Error(weatherData.error);
+                
+                const units = statusData ? statusData.units : 'metric';
+                const details = weatherData.details || {};
+                document.getElementById('forecast-rain').textContent = formatPrecipitation(details.forecast_rain || 0, units);
+                document.getElementById('rain-chance').textContent = `${(details.rain_chance || 0).toFixed(0)}%`;
+                document.getElementById('recent-rain').textContent = formatPrecipitation(details.recent_rain || 0, units);
+                const decision = weatherData.skip_irrigation ? 'Skip' : (weatherData.reduce_duration ? 'Reduce' : 'Normal');
+                document.getElementById('weather-decision').textContent = decision;
+                document.getElementById('weather-decision').title = weatherData.reason || '';
                 
                 updateStats();
             } catch (error) {
@@ -1175,31 +1148,27 @@
         async function refreshData() {
             try {
                 const response = await fetch('api/status');
+                if (!response.ok) throw new Error('Failed to fetch status');
                 statusData = await response.json();
                 updateZoneCards();
                 updateStats();
+                await initChart(); // Update chart data
             } catch (error) {
                 console.error('Error fetching status:', error);
             }
         }
         
-        // Close modal when clicking outside
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
         }
         
-        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             refreshData();
             checkWeather();
-            
-            // Auto-refresh every 30 seconds
-            setInterval(refreshData, 30000);
-            
-            // Weather check every 5 minutes
-            setInterval(checkWeather, 300000);
+            setInterval(refreshData, 10000); // Refresh more often for status and chart
+            setInterval(checkWeather, 300000); // Check weather every 5 mins
         });
     </script>
 </body>
