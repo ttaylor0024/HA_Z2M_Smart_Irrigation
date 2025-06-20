@@ -11,7 +11,6 @@ import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
 import aiohttp
-import schedule
 from flask import Flask, render_template, request, jsonify
 import threading
 import time
@@ -705,8 +704,11 @@ async def main():
     # Initialize controller
     irrigation_controller = SmartIrrigationController()
     
-    # Schedule regular checks every minute
-    schedule.every(1).minutes.do(lambda: asyncio.create_task(irrigation_controller.process_scheduled_irrigation()))
+    # Main loop - check every minute without schedule library
+    while True:
+        # Run irrigation check every minute
+        await irrigation_controller.process_scheduled_irrigation()
+        await asyncio.sleep(60)  # Wait 60 seconds
     
     # Start web server in separate thread
     def run_web_server():
@@ -715,11 +717,6 @@ async def main():
     web_thread = threading.Thread(target=run_web_server)
     web_thread.daemon = True
     web_thread.start()
-    
-    # Main loop
-    while True:
-        schedule.run_pending()
-        await asyncio.sleep(30)
 
 if __name__ == "__main__":
     asyncio.run(main())
