@@ -4,32 +4,26 @@ FROM $BUILD_FROM
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies - both runtime and build
+# Install system packages and Python packages available in Alpine
 RUN apk add --no-cache \
     python3 \
     py3-pip \
+    py3-setuptools \
+    py3-wheel \
     bash \
     curl \
-    # Runtime dependencies
-    libffi \
-    openssl \
-    yaml \
-    # Build dependencies (needed for pip install)
-    gcc \
-    musl-dev \
-    libffi-dev \
-    openssl-dev \
-    python3-dev \
-    yaml-dev
+    # Python packages available in Alpine repos
+    py3-flask \
+    py3-yaml \
+    py3-requests \
+    py3-aiohttp \
+    py3-dateutil
 
-# Install Python packages
-RUN pip3 install --no-cache-dir \
-    flask==3.0.0 \
-    pyyaml==6.0.1 \
-    requests==2.31.0 \
-    aiohttp==3.9.1 \
-    schedule==1.2.0 \
-    python-dateutil==2.8.2
+# Upgrade pip first
+RUN python3 -m pip install --upgrade pip
+
+# Install only the schedule package via pip (not available in Alpine)
+RUN python3 -m pip install --no-cache-dir schedule==1.2.0
 
 # Copy application files
 COPY run.sh /
