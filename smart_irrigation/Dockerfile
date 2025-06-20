@@ -1,50 +1,50 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Force Python to flush stdout/stderr immediately
+# Set environment variables
 ENV PYTHONUNBUFFERED=1
 
-# 1) Runtime dependencies
+# Install system dependencies - both runtime and build
 RUN apk add --no-cache \
     python3 \
     py3-pip \
     bash \
     curl \
+    # Runtime dependencies
     libffi \
-    openssl
-
-# 2) Build-time dependencies (for C extensions)
-RUN apk add --no-cache --virtual .build-deps \
-    build-base \
-    python3-dev \
+    openssl \
+    yaml \
+    # Build dependencies (needed for pip install)
+    gcc \
+    musl-dev \
     libffi-dev \
     openssl-dev \
-    yaml-dev \
-    rust
+    python3-dev \
+    yaml-dev
 
-# 3) Install all Python requirements at once
+# Install Python packages
 RUN pip3 install --no-cache-dir \
-    flask==2.3.3 \
+    flask==3.0.0 \
     pyyaml==6.0.1 \
     requests==2.31.0 \
     aiohttp==3.9.1 \
     schedule==1.2.0 \
     python-dateutil==2.8.2
 
-# 4) Remove build-time deps to slim the image
-RUN apk del .build-deps
-
-# 5) Copy in your startup script and application
+# Copy application files
 COPY run.sh /
 COPY app/ /app/
 COPY templates/ /app/templates/
 
-# 6) Make run.sh executable and prep directories
-RUN chmod +x /run.sh \
- && mkdir -p /data /app/logs
+# Set permissions and create directories
+RUN chmod +x /run.sh && \
+    mkdir -p /data /app/logs
 
+# Set working directory
 WORKDIR /app
+
+# Expose port
 EXPOSE 8080
 
-# 7) Launch under s6-overlay (config.yaml has init: true)
+# Run the application
 CMD ["/run.sh"]
